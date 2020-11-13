@@ -110,6 +110,15 @@
             background: white;
             min-height: 0;
         }
+
+        .bold {
+            font-weight: bold;
+            padding: 5px 10px;
+        }
+
+        .error {
+            color: red;
+        }
     </style>
 </head>
 
@@ -117,7 +126,7 @@
     <div id="flex-container">
         <div id="message-column">
             <div id="message-div">
-                <p id="username"></p>
+                <div class="bold">You are <span id="username"></span>.</div>
                 <ul id="messages"></ul>
             </div>
             <form action="">
@@ -157,21 +166,52 @@
             });
             socket.on('username', function (user) {
                 $('#username').text(user.username);
+                document.cookie = `username=${user.username}`;
+                document.cookie = `userID=${user.id}`;
             });
             socket.on('update users', function (users) {
                 $('#users').empty();
-                users.map(user => $('#users').append($('<li>').text(user)));
+                updateUsers(users);
+            });
+            socket.on('problem', function (msg) {
+                $('#messages').append(formatErrorString(msg));
+                var messageBody = document.querySelector('#message-div');
+                messageBody.scrollTop = messageBody.scrollHeight - messageBody.clientHeight;
             });
         });
+
+        const updateUsers = (users) => {
+            const username = document.cookie
+                .split('; ')
+                .find(row => row.startsWith('username'))
+                .split('=')[1];
+            users.map(user => {
+                if (user === username) {
+                    $('#users').append(`<li class='bold'>${user} (you)</li>`)
+                } else $('#users').append($('<li>').text(user))
+            });
+        }
         const formatMessageString = (msg) => {
-            const str = `
-            <li>
+            const username = document.cookie
+                .split('; ')
+                .find(row => row.startsWith('username'))
+                .split('=')[1];
+            console.log(`COOKIE:  .${username} AND MSG NAME:  .${msg.username}`)
+            const className = msg.username === username ? 'class=bold' : '';
+            const formattedEl = `
+            <li ${className}>
                 <span>${msg.timestamp}</span>
                 <span style='color:#${msg.colour};'>${msg.username}:</span>
                 <span>${msg.message}</span>
             </li>`
-            return str;
-            // return msg.timestamp + '     ' + msg.username + ':   ' + msg.message + '......' + msg.colour;
+            return formattedEl;
+        }
+        const formatErrorString = (msg) => {
+            const formattedEl = `
+            <li>
+                <span class='error'>Error: ${msg}</span>
+            </li>`
+            return formattedEl;
         }
     </script>
 </body>
