@@ -45,11 +45,15 @@ const updateUsers = (users) => {
     });
 }
 const formatMessageString = (msg) => {
-    const username = document.cookie
+    const id = document.cookie
         .split('; ')
-        .find(row => row.startsWith('username'))
+        .find(row => row.startsWith('userID'))
         .split('=')[1];
-    const className = msg.username === username ? 'class=bold' : '';
+    const className = msg.id === id ? 'class=bold' : '';
+
+    console.log(id);
+    console.log(msg);
+
     const formattedEl = `
     <li ${className}>
         <span>${msg.timestamp}</span>

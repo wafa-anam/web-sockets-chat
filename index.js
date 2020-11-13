@@ -15,21 +15,23 @@ io.on('connection', (socket) => {
     console.log('a user connected');
     var cookief = socket.handshake.headers.cookie ? socket.handshake.headers.cookie : '';
     var cookies = cookie.parse(cookief);
-    if (!cookies.username) {
+    if (!cookies.userID) {
         socket.emit('username', addUser(socket.id))
     } else {
-        socket.emit('username', restoreName(cookies.username, socket.id))
+        console.log(cookies.userID);
+        console.log(users);
+        socket.emit('username', restoreName(cookies.userID, socket.id))
     }
 
     socket.emit('all messages', messages);
-    io.emit('update users', users.map(user => user.username));
+    io.emit('update users', users.filter(user => user.status === 'active').map(user => user.username));
 
     socket.on('chat message', (msg) => {
         processMessage(msg, socket)
     });
     socket.on('disconnect', () => {
         removeUser(socket.id);
-        io.emit('update users', users.map(user => user.username));
+        io.emit('update users', users.filter(user => user.status === 'active').map(user => user.username));
     });
 });
 
@@ -40,14 +42,17 @@ http.listen(3000, () => {
 let userNo = 1;
 
 const addUser = (id) => {
-    userID = { id: id, username: "User" + userNo, colour: '000000' }
+    userID = { id: id, username: "User" + userNo, colour: '000000', status: 'active' }
     userNo += 1;
     users.push(userID);
     return userID;
 }
 
 const removeUser = (id) => {
-    users = users.filter(user => user.id !== id);
+    const index = users.findIndex(user => user.id === id);
+    if (index !== -1) {
+        users[index].status = 'inactive';
+    }
 }
 
 const processMessage = (msg, socket) => {
@@ -67,11 +72,13 @@ const processMessage = (msg, socket) => {
     const user = users.find(user => user.id === socket.id);
     const username = user.username;
     const colour = user.colour;
+    const id = user.id;
 
     processed = replaceEmojis(msg);
 
     message = {
         username,
+        id,
         timestamp,
         message: processed,
         colour
@@ -86,7 +93,7 @@ function pad(n) {
 
 const changeUserName = (msg, socket) => {
     let newName = msg.substring(6);
-    if (users.map(user => user.username).includes(newName)) {
+    if (users.filter(user => user.status === 'active').map(user => user.username).includes(newName)) {
         socket.emit('problem', `Sorry, the name "${newName}" is aleady taken!`);
     } else {
         const index = users.findIndex(user => user.id === socket.id);
@@ -119,13 +126,24 @@ const changeUserColour = (msg, socket) => {
     return;
 }
 
-const restoreName = (oldName, id) => {
-    if (users.map(user => user.username).includes(oldName)) {
-        return addUser(id);
+const restoreName = (oldId, id) => {
+    const index = users.findIndex(user => user.id === oldId);
+
+    if (index !== -1) {
+        const oldName = users[index].username;
+        if (users.filter(user => user.id !== oldId).map(user => user.username).includes(oldName)) {
+            users = users.filter(user => user.id !== oldId);
+            newId = addUser(id);
+            messages = messages.map(msg => msg.id === oldId ? { ...msg, id: id, username: newId.username } : msg)
+            return newId;
+        } else {
+            users[index].id = id;
+            users[index].status = 'active'
+            messages = messages.map(msg => msg.id === oldId ? { ...msg, id: id } : msg)
+            return users[index];
+        }
     } else {
-        userID = { id: id, username: oldName, colour: '000000' }
-        users.push(userID);
-        return userID;
+        return addUser(id);
     }
 }
 
