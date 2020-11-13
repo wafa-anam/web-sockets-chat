@@ -1,0 +1,179 @@
+<!doctype html>
+<html>
+
+<head>
+    <title>Socket.IO chat</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body,
+        html {
+            height: 100%;
+        }
+
+        body {
+            height: 100vh;
+            margin: 0;
+            font: 13px Helvetica, Arial;
+            background: lightcoral;
+        }
+
+        h3 {
+            margin: 1rem;
+            margin-bottom: 0;
+        }
+
+        form {
+            padding: 3px;
+            /* position: fixed;
+            bottom: 0; */
+            width: auto;
+        }
+
+        form input {
+            border: 0;
+            padding: 10px;
+            width: 84%;
+            margin-right: 0.5%;
+        }
+
+        form button {
+            width: 15%;
+            background: rgb(130, 224, 255);
+            border: none;
+            padding: 10px;
+        }
+
+        #messages,
+        #users {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        #messages li,
+        #users li {
+            padding: 5px 10px;
+        }
+
+        #messages li:nth-child(odd) {
+            background: #eee;
+        }
+
+        #flex-container {
+            height: 100vh;
+
+
+            background: lightblue;
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            width: 100%;
+            max-width: 960px;
+            justify-self: center;
+            margin: 0 auto;
+            max-height: 100%;
+        }
+
+        #message-column {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            flex: 3;
+            justify-content: flex-end;
+            min-height: 0;
+            /* max-height: 100%; */
+            flex-grow: 1;
+        }
+
+        #users-column {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            border: solid black 2px;
+            min-height: 0;
+        }
+
+        #message-div {
+            overflow: auto;
+            min-height: 0;
+        }
+
+        #users-div {
+            margin: 1rem;
+            display: flex;
+            flex-direction: column;
+            background: white;
+            min-height: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="flex-container">
+        <div id="message-column">
+            <div id="message-div">
+                <p id="username"></p>
+                <ul id="messages"></ul>
+            </div>
+            <form action="">
+                <input id="m" autocomplete="off" /><button>Send</button>
+            </form>
+        </div>
+        <div id="users-column">
+            <h3>Online users: </h3>
+            <div id="users-div">
+                <ul id="users"></ul>
+            </div>
+        </div>
+    </div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script>
+        $(function () {
+            var socket = io();
+            $('form').submit(function (e) {
+                e.preventDefault(); // prevents page reloading
+                socket.emit('chat message', $('#m').val());
+                $('#m').val('');
+                return false;
+            });
+            socket.on('chat message', function (msg) {
+                // $('#messages').append($('<li>').innerHTML(formatMessageString(msg)));
+                $('#messages').append(formatMessageString(msg));
+                var messageBody = document.querySelector('#message-div');
+                messageBody.scrollTop = messageBody.scrollHeight - messageBody.clientHeight;
+            });
+            socket.on('all messages', function (msgs) {
+                $('#messages').empty();
+                // msgs.map(msg => $('#messages').append($('<li>').innerHTML(formatMessageString(msg))));
+                msgs.map(msg => $('#messages').append(formatMessageString(msg)));
+                var messageBody = document.querySelector('#message-div');
+                messageBody.scrollTop = messageBody.scrollHeight - messageBody.clientHeight;
+            });
+            socket.on('username', function (user) {
+                $('#username').text(user.username);
+            });
+            socket.on('update users', function (users) {
+                $('#users').empty();
+                users.map(user => $('#users').append($('<li>').text(user)));
+            });
+        });
+        const formatMessageString = (msg) => {
+            const str = `
+            <li>
+                <span>${msg.timestamp}</span>
+                <span style='color:#${msg.colour};'>${msg.username}:</span>
+                <span>${msg.message}</span>
+            </li>`
+            return str;
+            // return msg.timestamp + '     ' + msg.username + ':   ' + msg.message + '......' + msg.colour;
+        }
+    </script>
+</body>
+
+</html>
