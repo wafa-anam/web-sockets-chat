@@ -1,0 +1,33 @@
+<!doctype html>
+<html>
+
+<head>
+    <title>Socket.IO chat</title>
+    <meta charset="UTF-8">
+    <link href="/style.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+    <div id="flex-container">
+        <div id="message-column">
+            <div id="message-div">
+                <div class="bold">You are <span id="username"></span>.</div>
+                <ul id="messages"></ul>
+            </div>
+            <form action="">
+                <input id="m" autocomplete="off" /><button>Send</button>
+            </form>
+        </div>
+        <div id="users-column">
+            <h3>Online users: </h3>
+            <div id="users-div">
+                <ul id="users"></ul>
+            </div>
+        </div>
+    </div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script src="code.js"></script>
+</body>
+
+</html>

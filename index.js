@@ -1,10 +1,14 @@
-var app = require('express')();
+var express = require('express')
+var app = express();
 var http = require('http').createServer(app);
 var io = require('socket.io')(http);
 var cookie = require("cookie");
+var path = require('path')
+
+app.use(express.static(path.join(__dirname, '/client')));
 
 app.get('/', (req, res) => {
-    res.sendFile(__dirname + '/index.html');
+    res.sendFile(__dirname + '/client/index.html');
 });
 
 io.on('connection', (socket) => {
@@ -63,10 +67,13 @@ const processMessage = (msg, socket) => {
     const user = users.find(user => user.id === socket.id);
     const username = user.username;
     const colour = user.colour;
+
+    processed = replaceEmojis(msg);
+
     message = {
         username,
         timestamp,
-        message: msg,
+        message: processed,
         colour
     };
     messages.push(message);
@@ -120,6 +127,31 @@ const restoreName = (oldName, id) => {
         users.push(userID);
         return userID;
     }
+}
+
+const replaceEmojis = (msg) => {
+    let updated = msg.replace(':)', '&#x1F60A');
+    updated = updated.replace('(:', '&#x1F60A');
+
+    updated = updated.replace(':(', '&#x1F641');
+    updated = updated.replace('):', '&#x1F641');
+
+    updated = updated.replace(':o', '&#x1F632');
+    updated = updated.replace('o:', '&#x1F632');
+
+    updated = updated.replace(":'(", '&#x1F622');
+    updated = updated.replace(")':", '&#x1F622');
+
+    updated = updated.replace(";)", '&#x1F609');
+    updated = updated.replace("(;", '&#x1F609');
+
+    updated = updated.replace(":D", '&#x1F600');
+    updated = updated.replace("D:", '&#x1F626');
+
+    updated = updated.replace(":P", '&#x1F61B');
+    updated = updated.replace(":p", '&#x1F61B');
+
+    return updated;
 }
 
 messages = []
