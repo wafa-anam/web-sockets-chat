@@ -18,8 +18,6 @@ io.on('connection', (socket) => {
     if (!cookies.userID) {
         socket.emit('username', addUser(socket.id))
     } else {
-        console.log(cookies.userID);
-        console.log(users);
         socket.emit('username', restoreName(cookies.userID, socket.id))
     }
 
@@ -57,12 +55,18 @@ const removeUser = (id) => {
 
 const processMessage = (msg, socket) => {
 
-    if (msg.startsWith('/name ')) {
+    if (msg.trim().startsWith('/name ')) {
         changeUserName(msg, socket);
         return;
     }
-    if (msg.startsWith('/color ') || msg.startsWith('/colour ')) {
+    if (msg.trim().startsWith('/color ') || msg.startsWith('/colour ')) {
         changeUserColour(msg, socket);
+        return;
+    }
+    if (msg.trim().startsWith('/')) {
+        const parts = msg.trim().split(" ");
+        const command = parts[0];
+        socket.emit('problem', `'${command}' is an invalid command. Try '/name newName' or '/colour RRGGBB'.`);
         return;
     }
 
@@ -84,6 +88,13 @@ const processMessage = (msg, socket) => {
         colour
     };
     messages.push(message);
+    if (messages.length > 200) {
+        console.log("more than 200: ");
+        console.log("oldest message being removed: " + messages[0].message);
+        messages = messages.slice(1)
+        console.log("new length: " + messages.length);
+        console.log("new oldest:" + messages[0].message);
+    }
     io.emit('chat message', message);
 }
 
@@ -92,9 +103,9 @@ function pad(n) {
 }
 
 const changeUserName = (msg, socket) => {
-    let newName = msg.substring(6);
+    let newName = msg.trim().substring(6);
     if (users.filter(user => user.status === 'active').map(user => user.username).includes(newName)) {
-        socket.emit('problem', `Sorry, the name "${newName}" is aleady taken!`);
+        socket.emit('problem', `Sorry, the name '${newName}' is aleady taken!`);
     } else {
         const index = users.findIndex(user => user.id === socket.id);
         const oldName = users[index].username;
@@ -109,8 +120,8 @@ const changeUserName = (msg, socket) => {
 }
 
 const changeUserColour = (msg, socket) => {
-    let colour = msg.substring(7);
-    colour = colour.trimLeft()
+    let colour = msg.trim().substring(7);
+    colour = colour.trim();
     var hexTest = /[0-9A-F]{6}$/i;
     if (hexTest.test(colour)) {
         const index = users.findIndex(user => user.id === socket.id);
@@ -121,7 +132,7 @@ const changeUserColour = (msg, socket) => {
         io.emit('all messages', messages);
         io.emit('update users', users.map(user => user.username));
     } else {
-        socket.emit('problem', `Sorry, "${colour}" is an invalid hexadecimal string. Please enter color in RRGGBB format.`);
+        socket.emit('problem', `Sorry, '${colour}' is an invalid hexadecimal string. Please enter color in RRGGBB format.`);
     }
     return;
 }

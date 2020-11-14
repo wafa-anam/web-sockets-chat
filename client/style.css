@@ -13,7 +13,7 @@ body {
     height: 100vh;
     margin: 0;
     font: 13px Helvetica, Arial;
-    background: lightcoral;
+    background: #e8e0c7;
 }
 
 h3 {
@@ -23,22 +23,20 @@ h3 {
 
 form {
     padding: 3px;
-    /* position: fixed;
-    bottom: 0; */
     width: auto;
 }
 
 form input {
-    border: 0;
+    border: solid black 1px;
     padding: 10px;
     width: 84%;
     margin-right: 0.5%;
 }
 
 form button {
+    border: solid black 1px;
     width: 15%;
-    background: rgb(130, 224, 255);
-    border: none;
+    background: #8be3d7;
     padding: 10px;
 }
 
@@ -56,14 +54,14 @@ form button {
 }
 
 #messages li:nth-child(odd) {
-    background: #eee;
+    background: #e0a4c6;
 }
 
 #flex-container {
     height: 100vh;
 
-
-    background: lightblue;
+    border-left: solid black 2px;
+    background: #e38bbd;
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
@@ -88,8 +86,10 @@ form button {
     display: flex;
     flex-direction: column;
     flex: 1;
-    border: solid black 2px;
+    border-left: solid black 2px;
+    border-right: solid black 2px;
     min-height: 0;
+    background: #8be3d7;
 }
 
 #message-div {
@@ -101,8 +101,10 @@ form button {
     margin: 1rem;
     display: flex;
     flex-direction: column;
-    background: white;
+    border: solid black 2px ;
     min-height: 0;
+    height: 100%;
+    background: white;
 }
 
 .bold {
@@ -111,5 +113,5 @@ form button {
 }
 
 .error {
-    color: red;
+    color: #4d4dff;
 }

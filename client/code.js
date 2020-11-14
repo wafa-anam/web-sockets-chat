@@ -51,9 +51,6 @@ const formatMessageString = (msg) => {
         .split('=')[1];
     const className = msg.id === id ? 'class=bold' : '';
 
-    console.log(id);
-    console.log(msg);
-
     const formattedEl = `
     <li ${className}>
         <span>${msg.timestamp}</span>
