@@ -1,9 +1,9 @@
-var express = require('express')
+var express = require('express');
 var app = express();
 var http = require('http').createServer(app);
 var io = require('socket.io')(http);
 var cookie = require("cookie");
-var path = require('path')
+var path = require('path');
 var port = process.env.PORT || 3000;
 
 
@@ -161,28 +161,40 @@ const restoreName = (oldId, id) => {
 }
 
 const replaceEmojis = (msg) => {
-    let updated = msg.replace(':)', '&#x1F60A');
-    updated = updated.replace('(:', '&#x1F60A');
+    let updated = replaceAll(':\\)', '&#x1F60A', msg);
+    updated = replaceAll('\\(:', '&#x1F60A', updated);
 
-    updated = updated.replace(':(', '&#x1F641');
-    updated = updated.replace('):', '&#x1F641');
+    updated = replaceAll(':\\(', '&#x1F641', updated);
+    updated = replaceAll('\\):', '&#x1F641', updated);
 
-    updated = updated.replace(':o', '&#x1F632');
-    updated = updated.replace('o:', '&#x1F632');
+    updated = replaceAll(':o', '&#x1F632', updated);
+    updated = replaceAll('o:', '&#x1F632', updated);
 
-    updated = updated.replace(":'(", '&#x1F622');
-    updated = updated.replace(")':", '&#x1F622');
+    updated = replaceAll(":'\\(", '&#x1F622', updated);
+    updated = replaceAll("\\)':", '&#x1F622', updated);
 
-    updated = updated.replace(";)", '&#x1F609');
-    updated = updated.replace("(;", '&#x1F609');
+    updated = replaceAll(";\\)", '&#x1F609', updated);
+    updated = replaceAll("\\(;", '&#x1F609', updated);
 
-    updated = updated.replace(":D", '&#x1F600');
-    updated = updated.replace("D:", '&#x1F626');
+    updated = replaceAll(":D", '&#x1F600', updated);
+    updated = replaceAll("D:", '&#x1F626', updated);
 
-    updated = updated.replace(":P", '&#x1F61B');
-    updated = updated.replace(":p", '&#x1F61B');
+    updated = replaceAll(":P", '&#x1F61B', updated);
+    updated = replaceAll(":p", '&#x1F61B', updated);
+
+    updated = replaceAll(":\\*", '&#x1F618', updated);
+    updated = replaceAll("\\*:", '&#x1F618', updated);
+
+    updated = replaceAll(":\\/", '&#x1F615', updated);
+    updated = replaceAll("\\/:", '&#x1F615', updated);
 
     return updated;
+}
+
+const replaceAll = (search, replaceWith, str) => {
+    const searchRegExp = new RegExp(search, 'g');
+    const result = str.replace(searchRegExp, replaceWith);
+    return result
 }
 
 messages = []
